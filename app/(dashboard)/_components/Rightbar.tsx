@@ -5,6 +5,7 @@ import SubscribeAds from "./_common/SubscribeAds";
 
 import SearchForm from "./SearchForms";
 import FollowList from "./FollowList";
+import TweetList from "./_common/TweetList";
 
 
 const Rightbar = (props: { isPro: boolean }) => {
@@ -19,6 +20,8 @@ const Rightbar = (props: { isPro: boolean }) => {
         {/* Search Form */}
         {pathname !== "/search" && <SearchForm />}
         {!props.isPro && <SubscribeAds />}
+        
+        <TweetList />
         <FollowList />
       </div>
     </div>

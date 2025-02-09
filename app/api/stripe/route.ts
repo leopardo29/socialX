@@ -1,89 +1,80 @@
-import Stripe from "stripe";
-import { headers } from "next/headers";
-import { NextResponse } from "next/server";
-import { stripe } from "@/lib/stripe";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prismadb";
-import { PLAN_TYPE } from "@/constants/pricing-plans-premiun";
+import { stripe } from "@/lib/stripe";
+import { absoluteUrl } from "@/lib/utils";
+import { NextResponse } from "next/server";
 
-export async function POST(req: Request) {
-  const body = await req.text();
-  const signature = (await headers()).get("stripe-signature") as string;
+const settingsUrl = absoluteUrl("/settings");
 
-  if (!signature) {
-    return new NextResponse("Missing Stripe signature", { status: 400 });
-  }
-
-  let event: Stripe.Event;
+export async function GET() {
   try {
-    event = stripe.webhooks.constructEvent(
-      body,
-      signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
-    );
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { message: "Not authenticated", status: "error" },
+        { status: 401 }
+      );
+    }
+
+    const currentUserId = +session.user.id;
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: currentUserId,
+      },
+    });
+
+    if (!user) {
+      return new NextResponse("User not found", { status: 404 });
+    }
+
+    const userSubscription = await prisma.subscription.findUnique({
+      where: {
+        userId: user?.id,
+      },
+    });
+
+    if (userSubscription && userSubscription.stripeCustomerId) {
+      const stripeSession = await stripe.billingPortal.sessions.create({
+        customer: userSubscription.stripeCustomerId,
+        return_url: settingsUrl,
+      });
+
+      return new NextResponse(JSON.stringify({ url: stripeSession.url }));
+    }
+
+    const stripeCheckoutSession = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      success_url: settingsUrl,
+      cancel_url: settingsUrl,
+      payment_method_types: ["card"],
+      billing_address_collection: "auto",
+      customer_email: user.email,
+      line_items: [
+        {
+          price_data: {
+            currency: "USD",
+            product_data: {
+              name: "Social X Pro",
+              description: "Unlimited access to premium services",
+            },
+            unit_amount: 1099,
+            recurring: {
+              interval: "month",
+            },
+          },
+          quantity: 1,
+        },
+      ],
+      metadata: {
+        userId: user.id,
+      },
+    });
+    return new NextResponse(JSON.stringify({ url: stripeCheckoutSession.url }));
   } catch (error) {
-    return new NextResponse(`Webhook Error: ${(error as Error).message}`, { status: 500 });
+    console.log(error, "error");
+    return new NextResponse("Internal Server Error", {
+      status: 500,
+    });
   }
-
-  const session = event.data.object as Stripe.Checkout.Session;
-
-  if (event.type === "checkout.session.completed") {
-    const subscription = await stripe.subscriptions.retrieve(
-      session.subscription as string
-    );
-
-    if (!session?.metadata?.userId) {
-      return new NextResponse("User is required", { status: 400 });
-    }
-
-    try {
-      await prisma.subscription.create({
-        data: {
-          userId: +session.metadata.userId,
-          plan: PLAN_TYPE.PRO,
-          stripeSubscriptionId: subscription.id,
-          stripeCustomerId: subscription.customer as string,
-          stripePriceId: subscription.items.data[0].price.id,
-          stripeCurrentPeriodEnd: new Date(
-            subscription.current_period_end * 1000
-          ),
-        },
-      });
-
-      // Actualizamos el usuario para marcarlo como verificado
-      await prisma.user.update({
-        where: { id: Number(session.metadata.userId) },
-        data: { isVerifed: true },
-      });
-    } catch {
-      return new NextResponse("Failed to create subscription", {
-        status: 500,
-      });
-    }
-  }
-
-  if (event.type === "invoice.payment_succeeded") {
-    const subscription = await stripe.subscriptions.retrieve(
-      session.subscription as string
-    );
-
-    try {
-      await prisma.subscription.update({
-        where: {
-          stripeSubscriptionId: subscription.id,
-        },
-        data: {
-          stripePriceId: subscription.items.data[0].price.id,
-          stripeCurrentPeriodEnd: new Date(
-            subscription.current_period_end * 1000
-          ),
-        },
-      });
-    } catch {
-      return new NextResponse("Failed to update subscription", {
-        status: 500,
-      });
-    }
-  }
-
-  return new NextResponse(null, { status: 200 });
 }

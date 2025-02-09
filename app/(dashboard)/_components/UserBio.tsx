@@ -5,10 +5,10 @@ import { useCurrentUserContext } from "@/context/currentuser-provider";
 import { Button } from "@/components/ui/button";
 import { CalendarCheck } from "lucide-react";
 import { useStore } from "@/hooks/useStore";
-
-import { PLAN_TYPE } from "@/constants/pricing-plans-premiun";
-import Badge from "@/components/badge";
 import FollowButton from "./_common/FollowButton";
+
+import Badge from "@/components/badge";
+import { PLAN_TYPE } from "@/constants/pricing-plans-premiun";
 
 interface PropsType {
   user: UserType;
@@ -44,7 +44,7 @@ const UserBio: React.FC<PropsType> = ({ user }) => {
             Edit Profile
           </Button>
         ) : (
-          <FollowButton userId={Number(user?.id)} username={user?.username as string} />
+          <FollowButton userId={user?.id} username={user?.username as string} />
         )}
       </div>
       <div className="mt-7 px-4">

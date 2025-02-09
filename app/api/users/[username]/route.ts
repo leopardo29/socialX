@@ -1,40 +1,32 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prismadb";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { NextResponse } from "next/server";
 
-
-export async function GET() {
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ username: string }> }
+) {
+  const { username } = await params;
+  
   try {
     const session = await auth();
-
-    // Validar la sesión
-    if (!session || !session.user || !session.user.id) {
+    if (!session?.user?.id) {
       return NextResponse.json(
         { message: "Not authenticated", status: "error" },
         { status: 401 }
       );
     }
 
-    // Validar el ID del usuario
-    const userId = session.user.id;
-    if (!userId || isNaN(+userId)) {
+    if (!username) {
       return NextResponse.json(
-        { message: "Invalid user ID", status: "error" },
+        { message: "Username must be provided", status: "error" },
         { status: 400 }
       );
     }
-    const currentUserId = +userId;
 
-    // Consultar usuarios
-    const users = await prisma.user.findMany({
+    const existingUser = await prisma.user.findUnique({
       where: {
-        id: {
-          not: currentUserId,
-        },
-      },
-      orderBy: {
-        createdAt: "desc",
+        username: username,
       },
       select: {
         id: true,
@@ -50,7 +42,6 @@ export async function GET() {
         updatedAt: true,
         followingIds: true,
         hasNotification: true,
-        isVerifed: true,
         subscription: {
           select: {
             plan: true,
@@ -59,28 +50,28 @@ export async function GET() {
       },
     });
 
-    // Manejar el caso de no encontrar usuarios
-    if (users.length === 0) {
+    if (!existingUser) {
       return NextResponse.json(
-        { message: "No users found", status: "success", data: [] },
-        { status: 200 }
+        { message: "User not found", status: "error" },
+        { status: 404 }
       );
     }
 
+    const followersCount = await prisma.user.count({
+      where: {
+        followingIds: {
+          has: existingUser.id,
+        },
+      },
+    });
+
     return NextResponse.json({
-      message: "Users retrieved successfully",
+      message: "User retrieved successfully",
       status: "success",
-      data: users,
+      data: { ...existingUser, followersCount },
     });
   } catch (err) {
-    if (err instanceof PrismaClientKnownRequestError) {
-      console.error("Prisma error:", err.message);
-      return NextResponse.json(
-        { message: "Database error", status: "error" },
-        { status: 500 }
-      );
-    }
-    console.error("Unexpected error:", err);
+    console.error("Error retrieving user:", err);
     return NextResponse.json(
       { message: "Internal Server Error", status: "error" },
       { status: 500 }

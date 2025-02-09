@@ -116,9 +116,7 @@ const EditProfileModal = () => {
           <div
             className="w-full bg-neutral-300 
           dark:bg-neutral-900 h-44 relative 
-            rounded-md
-
-          "
+            rounded-md"
           >
             <CoverImageUpload
               value={form?.getValues()?.coverImage}

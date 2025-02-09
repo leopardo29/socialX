@@ -75,6 +75,7 @@ const PostItem: React.FC<PropsType> = ({ post, userId }) => {
           w-full border-b-[1px]
           dark:border-[rgb(47,51,54)]
           p-5 transition relative
+          
           "
     >
       <div
@@ -109,7 +110,7 @@ const PostItem: React.FC<PropsType> = ({ post, userId }) => {
             <span
               className="!text-[#959fa8] 
               text-sm inline-block truncate 
-              font-normal"
+              font-normal bg-red-200"
               role="button"
               onClick={goToUser}
             >
@@ -131,10 +132,10 @@ const PostItem: React.FC<PropsType> = ({ post, userId }) => {
             </div>
           </div>
 
-          <div className="mt-1 w-full flex  h-[4em] mb-10 border-b-[1px] dark:border-[rgb(47,51,54)]">
+          <div className="mt-4 p-2 w-full flex   mb-8 border-b-[1px] dark:border-[rgb(47,51,54)]">
             <div
               dangerouslySetInnerHTML={{ __html: post.body }}
-              className="lg:h-24 text-black dark:text-white overflow-hidden break-words line-clamp-4 font-semibold"
+              className="lg:h-24 text-black dark:text-white overflow-hidden break-words  font-semibold"
             />
           </div>
 

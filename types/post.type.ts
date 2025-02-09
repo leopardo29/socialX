@@ -9,6 +9,7 @@ type PostType = {
   postGif: string;
   createdAt: string;
   updatedAt: string;
+  content: string;
   
   user: UserType;
   

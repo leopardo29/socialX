@@ -8,7 +8,6 @@ import Logo from "@/components/logo";
 import { useStore } from "@/hooks/useStore";
 import cn from "classnames";
 
-
 interface PropsType {
   label?: string;
   href?: string;
@@ -57,7 +56,12 @@ const SidebarItem: React.FC<PropsType> = ({
       return <Logo width="28px" height="28px" className="lg:w-8 lg:h-8" />;
     } else if (label === "Premium") {
       // Usar BadgeCheckIcon en vez de Logo para Premium.
-      return <BadgeCheckIcon size={28} className="lg:w-8 lg:h-8 text-[#14171A] dark:text-white group-hover:text-indigo-900" />;
+      return (
+        <BadgeCheckIcon
+          size={28}
+          className="lg:w-8 lg:h-8 text-[#14171A] dark:text-white group-hover:text-indigo-900"
+        />
+      );
     } else {
       return Icon ? <Icon size={28} className="" /> : null;
     }
@@ -65,21 +69,24 @@ const SidebarItem: React.FC<PropsType> = ({
 
   return (
     <a
-    onClick={href === "#premium" ? handleOpenModal : handleClick}
-    className={cn(
-      "group flex mt-4 items-center w-[2.50em] lg:w-full ml-2  lg:p-3 rounded-lg transition-all duration-100 cursor-pointer",
-      "hover:dark:bg-gradient-to-br hover:dark:from-neutral-800 hover:dark:via-slate-900 hover:dark:to-[#2e2e2e2e] hover:dark:shadow-sm",
-      "focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2",
-      activePath
-        ? "bg-slate-500 dark:bg-gradient-to-br from-neutral-800 via-slate-800 to-[#2e2e2e2e] shadow-sm dark:text-green-700 font-semibold"
-        : "text-slate-950 dark:text-white hover:dark:text-indigo-900"
-    )}
-  >
-       {/* Versión móvil: se oculta en pantallas grandes */}
-       <div className="flex items-center justify-center lg:hidden  p-1">
+      onClick={href === "#premium" ? handleOpenModal : handleClick}
+      className={cn(
+        "group flex mt-4 items-center w-[2.50em] lg:w-full ml-2  lg:p-3 rounded-lg transition-all duration-100 cursor-pointer",
+        "hover:dark:bg-gradient-to-br hover:dark:from-neutral-800 hover:dark:via-slate-900 hover:dark:to-[#2e2e2e2e] hover:dark:shadow-sm",
+        "focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2",
+        activePath
+          ? "bg-slate-500 dark:bg-gradient-to-br from-neutral-800 via-slate-800 to-[#2e2e2e2e] shadow-sm dark:text-green-700 font-semibold"
+          : "text-slate-950 dark:text-white hover:dark:text-indigo-900"
+      )}
+    >
+      {/* Versión móvil: se oculta en pantallas grandes */}
+      <div className="flex items-center justify-center lg:hidden  p-1">
         {isUser && userInfo ? (
           <Avatar className="h-14 w-14">
-            <AvatarImage src={userInfo.profileImgUrl} className="object-cover" />
+            <AvatarImage
+              src={userInfo.profileImgUrl}
+              className="object-cover"
+            />
             <AvatarFallback className="font-bold text-[18px]">
               {userInfo.name[0]}
             </AvatarFallback>

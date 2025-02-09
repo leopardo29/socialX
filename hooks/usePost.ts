@@ -19,6 +19,7 @@ const usePost = ({ userId, postId }: PropsType) => {
     : userId
     ? ["posts", "user", userId]
     : ["posts", "allposts"];
+    
 
   const { error, data, isLoading, isError, refetch } = useQuery({
     queryKey,
@@ -26,6 +27,7 @@ const usePost = ({ userId, postId }: PropsType) => {
     enabled: !!url,
     //staleTime: 0,
   });
+  
 
   return {
     data,

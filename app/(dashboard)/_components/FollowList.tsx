@@ -35,14 +35,18 @@ const FollowList = () => {
 
   return (
     <div
-      className="bg-background border
-   dark:border-[rgb(47,51,54)] rounded-xl p-4  w-full
+    className="bg-background border
+ dark:border-[rgb(47,51,54)] rounded-xl p-4
+"
+  >
+             <h2 className="text-[20px] font-bold">Who to follow</h2>
+
+    <div
+      className="p-2 w-full  h-[25vh] overflow-auto scroll-smooth scrollbar-hide 
   "
     >
-      <div className="w-full">
-        <h2 className="text-[20px] font-bold">Who to follow</h2>
-      </div>
-      <div className="overflow-auto scroll-smooth scrollbar-hide h-screen">
+     
+      <div className="">
         <ul role="list" className="flex flex-col gap-6 mt-4 pb-2">
           {users?.map((user) => (
             <li
@@ -93,6 +97,7 @@ const FollowList = () => {
           ))}
         </ul>
       </div>
+    </div>
     </div>
   );
 };

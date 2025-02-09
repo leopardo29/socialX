@@ -91,6 +91,7 @@ const DeepSeekForm = ({ initialQuery = "", onGenerate }: DeepSeekFormProps) => {
         setResponses(prev => [{ text: "Error al tomar foto", type: "error" }, ...prev]);
       });
   };
+  
 
   const renderMessageContent = (msg: { text: string; type: string; content?: Blob | File }) => {
     if (msg.content) {
