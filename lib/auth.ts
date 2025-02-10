@@ -9,6 +9,9 @@ import { generateBaseUsername } from "./helper";
 import { ensureUniqueUsername } from "@/app/actions/auth.action";
 import type { User as PrismaUser } from "@prisma/client";
 
+
+export const runtime ='nodejs';
+
 // Definimos un tipo de usuario para NextAuth con id como string y username opcional
 type NextAuthUser = Omit<PrismaUser, "id" | "username"> & {
   id: string;

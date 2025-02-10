@@ -2,12 +2,8 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prismadb";
 import { NextResponse } from "next/server";
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ username: string }> }
-) {
-  const { username } = await params;
-  
+export async function GET(request: Request, context: any) {
+  const { params } = context;
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -17,6 +13,7 @@ export async function GET(
       );
     }
 
+    const username = params.username;
     if (!username) {
       return NextResponse.json(
         { message: "Username must be provided", status: "error" },
@@ -42,6 +39,7 @@ export async function GET(
         updatedAt: true,
         followingIds: true,
         hasNotification: true,
+        //isVerified: true,
         subscription: {
           select: {
             plan: true,
@@ -49,7 +47,6 @@ export async function GET(
         },
       },
     });
-
     if (!existingUser) {
       return NextResponse.json(
         { message: "User not found", status: "error" },
@@ -70,10 +67,12 @@ export async function GET(
       status: "success",
       data: { ...existingUser, followersCount },
     });
-  } catch (err) {
-    console.error("Error retrieving user:", err);
+  } catch (error) {
     return NextResponse.json(
-      { message: "Internal Server Error", status: "error" },
+      {
+        message: "Internal Server Error",
+        status: "error",
+      },
       { status: 500 }
     );
   }

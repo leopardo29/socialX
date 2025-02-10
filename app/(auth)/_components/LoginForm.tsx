@@ -6,10 +6,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
+import { doCredentialLogin } from "@/app/actions/auth.action";
 import { useToast } from "@/hooks/use-toast";
 import { Spinner } from "@/components/spinner";
-import { doCredentialLogin } from "@/app/actions/auth.action";
 
 const LoginForm = () => {
   const { toast } = useToast();
@@ -41,8 +40,8 @@ const LoginForm = () => {
         description: "Login successful",
         variant: "default",
       });
-    } catch  {
-      
+    } catch (error) {
+      console.log(error);
       toast({
         title: "Error",
         description: "Failed to login",
